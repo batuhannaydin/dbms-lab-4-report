@@ -61,24 +61,57 @@ Ekran kaydı. 2-3 dk. açık kaynak V.T. kodu üzerinde konunun gösterimi. Vide
 
 ---
 
-# Açıklama (Ort. 600 kelime)
+# Açıklama
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse lacinia luctus urna, vel aliquet lacus facilisis ac. Donec quis placerat orci, efficitur consectetur lacus. Sed rhoncus erat ex, at sagittis velit mollis et. Aliquam enim orci, sollicitudin sit amet libero quis, mollis ultricies risus. Fusce tempor, felis a consequat tristique, dolor magna convallis nulla, vel ullamcorper magna mauris non ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam quis imperdiet ex, at blandit sapien. Aliquam lacinia erat ac ipsum fringilla, quis vestibulum augue posuere. Nulla in enim nulla. Nunc euismod odio mauris, sed sollicitudin ex condimentum non. In efficitur egestas enim. Fusce tempus erat quis placerat convallis.
+Bu doküman, PostgreSQL'in neden satır bazlı değil sayfa (page) bazlı çalıştığını; bellek yönetimi, veri yapıları ve yazma güvenliği perspektiflerinden ele alan teknik bir açıklamadır. Açıklamalar doğrudan PostgreSQL kaynak kodlarıyla ilişkilendirilmiştir.
 
-Nam sit amet tincidunt ante. Pellentesque sit amet quam interdum, pellentesque dui vel, iaculis elit. Donec sed dui sodales nulla dignissim tincidunt. Maecenas semper metus id fermentum vulputate. Pellentesque lobortis hendrerit venenatis. Nullam imperdiet, ex eget ultricies egestas, mauris nunc aliquam ante, sed consectetur tellus ex vel leo. Nunc ut erat dapibus, auctor dolor eu, pretium sem. In lacinia congue eros et finibus. Aenean auctor, leo a feugiat placerat, urna felis lacinia purus, laoreet volutpat mi nisl eget dui. Ut vitae condimentum leo.
+1. Sistem Perspektifi: Sayfa Yapısı ve Blok Bazlı Erişim
 
-Maecenas ex diam, vehicula et nulla vel, mattis viverra metus. Nam at ex scelerisque, semper augue lobortis, semper est. Etiam id pretium odio, eget rutrum neque. Pellentesque blandit magna vel aliquam gravida. Nullam massa nisl, imperdiet at dapibus non, cursus vehicula turpis. Vestibulum rutrum hendrerit augue. Aliquam id nisi id arcu tempor venenatis vel nec erat. Morbi sed posuere erat. Morbi et sollicitudin urna. Suspendisse ullamcorper vitae purus sit amet sodales. Nam ut tincidunt ipsum, ut varius erat. Duis congue magna nec euismod condimentum. In hac habitasse platea dictumst. Nunc mattis odio sed enim laoreet imperdiet. In hac habitasse platea dictumst. Nullam tincidunt quis.
+Modern işletim sistemleri ve disk donanımları, veriye karakter bazlı erişmek yerine blok adı verilen sabit boyutlu birimlerle erişim sağlar. Veritabanları, bu donanım mimarisine uyum sağlamak ve disk I/O maliyetini düşürmek amacıyla sayfayı kullanır.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse lacinia luctus urna, vel aliquet lacus facilisis ac. Donec quis placerat orci, efficitur consectetur lacus. Sed rhoncus erat ex, at sagittis velit mollis et. Aliquam enim orci, sollicitudin sit amet libero quis, mollis ultricies risus. Fusce tempor, felis a consequat tristique, dolor magna convallis nulla, vel ullamcorper magna mauris non ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam quis imperdiet ex, at blandit sapien. Aliquam lacinia erat ac ipsum fringilla, quis vestibulum augue posuere. Nulla in enim nulla. Nunc euismod odio mauris, sed sollicitudin ex condimentum non. In efficitur egestas enim. Fusce tempus erat quis placerat convallis.
+PostgreSQL kaynak kodlarında src/include/storage/bufpage.h içerisinde tanımlanan PageHeaderData yapısı, veritabanının neden satır bazlı değil de sayfa bazlı okuma yaptığı gösteriyor. Koddaki önemli satırlardan birisi olan pd_linp dizisi, sayfanın başında yer alan bir içerik indeksidir.
 
-Nam sit amet tincidunt ante. Pellentesque sit amet quam interdum, pellentesque dui vel, iaculis elit. Donec sed dui sodales nulla dignissim tincidunt. Maecenas semper metus id fermentum vulputate. Pellentesque lobortis hendrerit venenatis. Nullam imperdiet, ex eget ultricies egestas, mauris nunc aliquam ante, sed consectetur tellus ex vel leo. Nunc ut erat dapibus, auctor dolor eu, pretium sem. In lacinia congue eros et finibus. Aenean auctor, leo a feugiat placerat, urna felis lacinia purus, laoreet volutpat mi nisl eget dui. Ut vitae condimentum leo.
+Eğer veritabanı diskten her seferinde tek bir satır okuyor olsaydı, sayfa başında o sayfa içindeki tüm satırların adreslerini tutan bir dizinin bulunmasına gerek duyulmazdı. pd_lower ve pd_upper değişkenleri ise sayfa alanı içinde verilerin ve işaretçilerin birbirine çarpmadan nasıl yerleştirileceğini, yani Slotted Page mimarisini yönetir.
 
-Maecenas ex diam, vehicula et nulla vel, mattis viverra metus. Nam at ex scelerisque, semper augue lobortis, semper est. Etiam id pretium odio, eget rutrum neque. Pellentesque blandit magna vel aliquam gravida. Nullam massa nisl, imperdiet at dapibus non, cursus vehicula turpis. Vestibulum rutrum hendrerit augue. Aliquam id nisi id arcu tempor venenatis vel nec erat. Morbi sed posuere erat. Morbi et sollicitudin urna. Suspendisse ullamcorper vitae purus sit amet sodales. Nam ut tincidunt ipsum, ut varius erat. Duis congue magna nec euismod condimentum. In hac habitasse platea dictumst. Nunc mattis odio sed enim laoreet imperdiet. In hac habitasse platea dictumst. Nullam tincidunt quis.
+Bu yapı sayesinde veritabanı, işletim sisteminden tek bir I/O çağrısıyla tüm sayfayı ram'e alır ve içindeki onlarca satıra işlemci seviyesinde hızlarla erişebilir. Bu yapı, disk kafasının rastgele hareketini minimize ederek toplam sistem performansını artıran temel bir sistem programlama yaklaşımıdır.
+
+2. Bellek Yönetimi: Buffer Pool ve I/O Minimizasyonu
+
+Veritabanları, diskteki fiziksel yavaşlığı telafi etmek için kendi yazılımsal önbellek mekanizmaları olan Buffer Pool yapısını kullanır. PostgreSQL'de bu mekanizmanın merkezi, src/backend/storage/buffer/bufmgr.c dosyasında yer alan ReadBuffer_common fonksiyonudur.
+
+Sistem bir veri talep ettiğinde süreç PinBufferForBlock fonksiyonu ile başlar. Bu fonksiyon, istenen sayfanın RAM'de olup olmadığını bir Hash Table üzerinden kontrol eder:
+
+Sayfa bellekteyse bu durum Buffer Hit olarak adlandırılır ve fiziksel disk erişimi tamamen baypas edilir. Veriye yaklaşık O(1) karmaşıklığında erişilir.
+
+Sayfa bellekte değilse Buffer Miss oluşur ve StartReadBuffer fonksiyonu devreye girerek pread gibi düşük seviyeli I/O sistem çağrılarını tetikler.
+
+Diskten okunan veri RAM'deki boş bir buffer alanına kopyalanır ve kullanımda olduğu sürece pin edilir. Bu mekanizma, sık erişilen verilerin bellekte kalmasını sağlayarak sistemin en yavaş bileşeni olan disk erişimlerini dramatik biçimde azaltır.
+
+3. Veri Yapıları Perspektifi: B+ Tree İndeksleme
+
+Verinin diskte hangi sayfada bulunduğunu hızlıca saptamak, Buffer Pool verimliliği açısından hayati önem taşır. PostgreSQL bu problemi, src/backend/access/nbtree/nbtsearch.c dosyasındaki _bt_search fonksiyonu ile çözer.
+
+Bu fonksiyon, disk blokları için optimize edilmiş ve yüksek dallanma katsayısına sahip olan B+ Tree veri yapısını kullanır. Klasik ikili arama ağaçlarının aksine, B+ Tree her düğümde yüzlerce anahtar tutabilir. Bu sayede ağacın yüksekliği minimumda tutulur.
+
+_bt_search fonksiyonu kök sayfadan başlayarak yaprak sayfalara kadar iner ve hedef verinin fiziksel adresini bulur. Bu yapı sayesinde milyonlarca satırlık bir tabloda bile yalnızca 3–4 sayfa okuması ile hedef veriye ulaşılabilir. Bu, rastgele disk taraması yerine hedef odaklı ve sınırlı I/O ile sonuç alma başarısıdır.
+
+4. Yazma Performansı ve Güvenlik: WAL (Write-Ahead Logging)
+
+Performans yalnızca okuma operasyonlarıyla değil, aynı zamanda yazma hızıyla da ölçülür. Rastgele disk yazma işlemleri, özellikle mekanik disklerde oldukça maliyetlidir.
+
+PostgreSQL, src/backend/access/transam/xlog.c dosyasında yer alan XLogInsertRecord fonksiyonu ile Write-Ahead Log (WAL) ilkesini uygular. Bu ilkeye göre, bir veri değişikliği yapıldığında asıl tablo dosyası hemen güncellenmez bunun yerine yapılan değişikliğin özeti, sıralı (sequential) bir günlük dosyasına yazılır. Sıralı yazma işlemi, disk kafasının sürekli hareket etmesini gerektirmediği için rastgele yazmaya kıyasla çok daha hızlıdır.
+
+Ayrıca kilit mekanizmalarıyla korunan bu süreç, sistem çökse bile WAL kayıtları sayesinde veritabanının kendini toparlayabilmesini ve veri kaybının önlenmesini sağlar. Böylece hem yazma performansı korunur hem de veri güvenliği en üst seviyeye çıkarılır.
+
+Sonuç
+
+Veritabanı performansı; donanım kısıtlarını yazılımsal katmanlarla (Buffer Pool, WAL) ve disk dostu veri yapılarıyla (B+ Tree, Slotted Page) aşma sanatıdır. PostgreSQL kaynak kodları, bu mimarinin pratikte nasıl uygulandığını açık ve öğretici bir biçimde ortaya koymaktadır.
+---
 
 ## VT Üzerinde Gösterilen Kaynak Kodları
 
-Açıklama [Linki](https://...) \
-Açıklama [Linki](https://...) \
-Açıklama [Linki](https://...) \
-... \
+Sayfa Yönetimi [Linki]([https://...](https://github.com/postgres/postgres/blob/master/src/include/storage/bufpage.h)) \
+Buffer Pool Kontrolü [Linki]([https://...](https://github.com/postgres/postgres/blob/master/src/backend/storage/buffer/bufmgr.c#L1268)) \
+B+ Algoritması [Linki]([https://...](https://github.com/postgres/postgres/blob/master/src/backend/access/nbtree/nbtsearch.c)) \
+WAL [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/transam/xlog.c) \
 ...
