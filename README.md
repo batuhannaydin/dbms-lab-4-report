@@ -12,7 +12,7 @@ Aşağıda kutucuk (checkbox) ile gösterilen maddelerden en az birini seçtiği
 
 ### Disk Erişimi
 
-- [ ]  **Blok bazlı disk erişimi** → block_id + offset
+- [X]  **Blok bazlı disk erişimi** → block_id + offset
 - [ ]  Rastgele erişim
 
 ### VT için Page (Sayfa) Anlamı
@@ -110,8 +110,8 @@ Veritabanı performansı; donanım kısıtlarını yazılımsal katmanlarla (Buf
 
 ## VT Üzerinde Gösterilen Kaynak Kodları
 
-Sayfa Yönetimi [Linki]([https://...](https://github.com/postgres/postgres/blob/master/src/include/storage/bufpage.h)) \
-Buffer Pool Kontrolü [Linki]([https://...](https://github.com/postgres/postgres/blob/master/src/backend/storage/buffer/bufmgr.c#L1268)) \
-B+ Algoritması [Linki]([https://...](https://github.com/postgres/postgres/blob/master/src/backend/access/nbtree/nbtsearch.c)) \
-WAL [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/transam/xlog.c) \
+Sayfa Yönetimi [Linki](https://github.com/postgres/postgres/blob/master/src/include/storage/bufpage.h)
+Buffer Pool Kontrolü [Linki](https://github.com/postgres/postgres/blob/master/src/backend/storage/buffer/bufmgr.c#L1268)
+B+ Algoritması [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/nbtree/nbtsearch.c)
+WAL [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/transam/xlog.c)
 ...
