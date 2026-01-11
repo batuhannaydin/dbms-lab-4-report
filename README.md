@@ -56,8 +56,9 @@ DB diske yazarken:
 
 ---
 
-# Video [Linki]([https://www.youtube.com/watch?v=Nw1OvCtKPII&t=2635s](https://youtu.be/bb9k6kFG2-M)) 
-Ekran kaydı. 2-3 dk. açık kaynak V.T. kodu üzerinde konunun gösterimi. Video kendini tanıtma ile başlamalıdır (Numara, İsim, Soyisim, Teknik İlgi Alanları). 
+# [Video Linki](https://youtu.be/bb9k6kFG2-M)
+
+Ekran kaydı. 2-3 dk. açık kaynak V.T. kodu üzerinde konunun gösterimi. Video kendini tanıtma ile başlamalıdır (Numara, İsim, Soyisim, Teknik İlgi Alanları).
 
 ---
 
